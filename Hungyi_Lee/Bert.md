@@ -1,14 +1,21 @@
 # 【機器學習2021】自督導式學習 (Self-supervised Learning) (二) – BERT簡介
 
-[link](https://www.youtube.com/watch?v=gh0hewYkjgo)<br>
+## Basic info
 
-一堆文章，进行情感分析：如果有标注，有很多方法
+[link](https://www.youtube.com/watch?v=gh0hewYkjgo)<br>
+<p>
+一堆文章，进行情感分析：如果有标注，有很多方法<br>
 
 self-supervised learning: 自己想办法做supervised，在没有label的情况下
 
-一堆文章，一部分作为输入，一部分作为标注
-可以把self-supervised learning看作unsupervised的一部嗯
-### Masking input
+一堆文章，一部分作为输入，一部分作为标注<br>
+可以把self-supervised learning看作unsupervised的一部分
+> *Token 级（MLM）：在同一序列中随机把若干 token 替成 [MASK]（或有时隨機替換/保留），模型輸入是被遮蔽的整段序列，目標是預測被 mask 的原詞；損失只在被 mask 的位置計算。*<br>
+>*句子／段落級（SOP/NSP 類）：把一個句子當作輸入，把另一個句子（或句子關係，如是否為下句）當作目標，任務不是填單詞而是判斷句子順序或關係。*<br>
+<p>
+
+
+## Masking input
 
 - Bert使用乐transformer的encoder架构
 - 输入一排向量，输出一排向量,即输入一段sequence，输出一段sequence,输入多长，输出多长
@@ -89,3 +96,31 @@ self-supervised learning: 自己想办法做supervised，在没有label的情况
 ---
 
 
+## Why does BERT work?
+
+> You shall know a word by the company it keeps. ---John Rupert Firth
+
+Bert: 在预测mask的过程中，上下文之间的语义能够被显现出来，由此看得出单个词/整个句子<br>
+- contextualized word embedding<br>
+- CBOW,一个曾经一层的线性模型，做过类似的工作，由于算力问题没做下去
+
+<p>
+奇怪的是,<br>
+用pre-trained on English的BERT，去在dna，protein,music上微调（不同的atcg，doremifasolaxi映射到随意但固定的英语单词，比如a是apple，t是table，c是cat，g是girl）然后做音乐，蛋白质，dna预测，他们的效果也比 bert那块是随机初始化而不是pretrainedonEnglish   好上不好。
+<p>
+
+> 好像bert是一种很好的初始化方法，或者是好的初始化参数，特别适合大模型训练
+
+<p>
+以及，<br>
+multi-lingual pretrain出的bert，在英语上finetune问答(Case4那样子的)，【没有finetuen中文上的问答训练】，<br>
+结果在中文问答上有不错的表现。
+
+>【意思】在不同语言下是共同的，或者说向量的“样子”相似<br>
+> alignment<br>
+> 很依赖大规模训练数据<br>
+
+但是，明明pre-trained的时候，是在multi-language下的，那为什么做mask的时候，它不会傻乎乎地把 I *** apple 填一个 “吃”进去呢（正确的是eat）？说明语言间还是有差别的吧？
+
+有人做了实验，比较中文词向量还有英文词向量，发现这个做差做出来的偏移向量是有点规律在里头的。<br>
+取这个偏移向量的平均值，对于an English sentence(词向量化后), 加上这个平均后的偏移量，得到了 Chinglish(中英夹杂的)意思类似的话。
